@@ -1,17 +1,24 @@
 import { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ImageBackground,
-} from "react-native";
+import {StyleSheet,View,Text,TouchableOpacity,TextInput,ImageBackground,Alert,Button} from "react-native";
+import { getAuth, signInAnonymously } from "firebase/auth";
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState("");
   const [background, setBackground] = useState("");
   const colors = ["#090C08", "#474056", "#8A95A5", "#B9C6AE"];
+  const auth = getAuth();
+
+  const signInUser = () => {
+    signInAnonymously(auth)
+    .then( result => {
+      navigation.navigate('Chat', {name: name, id: result.user.uid,background: background});
+      Alert.alert('Signed in succeccfully');
+    }).catch((error) => {
+      Alert.alert('Unable to signin, try later');
+    })
+  };
 
   return (
     <View style={styles.container}>
@@ -44,17 +51,12 @@ const Start = ({ navigation }) => {
               />
             ))}
           </View>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() =>
-              navigation.navigate("Chat", {
-                name: name,
-                background: background,
-              })
-            }
-          >
-            <Text style={styles.buttonText}>Start Chatting</Text>
-          </TouchableOpacity>
+          <Button
+            title="Start Chatting"
+            onPress={signInUser}
+            style={styles.buttonStartChatting}
+            color="#757083"
+          />
         </View>
       </ImageBackground>
     </View>
